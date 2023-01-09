@@ -1,5 +1,7 @@
+require('@babel/polyfill');
+const LedgerWalletProvider = require('truffle-ledger-provider');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const mnemonic = '';
+const mnemonic = 'practice bargain mobile drink junk never cigar winner morning trophy vague response';
 /**
  * Use this file to configure your truffle project. It's seeded with some
  * common settings for different networks and features like migrations,
@@ -36,6 +38,8 @@ module.exports = {
    *
    * $ truffle test --network <network-name>
    */
+  //default `build` directory is ignored in parent .gitignore
+  contracts_build_directory: "./build-truffle",
 
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
@@ -75,10 +79,15 @@ module.exports = {
     // production: true    // Treats this network as if it was a public net. (default: false)
     // }
     bsc: {
-      provider: () => new HDWalletProvider(
-        mnemonic, 
-        'https://bsc-dataseed.binance.org'
+      provider: () => new LedgerWalletProvider(
+        {
+          networkId: 56,
+          accountsOffset: 0
+        },
+        'https://bsc-dataseed.binance.org/'
       ),
+      gas: 1246759,
+      gasPrice: 5 * 10 ** 9,
       network_id: 56,
       skipDryRun: true
     },
@@ -100,7 +109,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.8.0",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.8.3",    // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {
@@ -110,5 +119,12 @@ module.exports = {
       //  evmVersion: "byzantium"
       // }
     }
-  }
+  },
+  plugins: [
+     'truffle-plugin-verify'
+   ],
+   api_keys: {
+     //bscscan: BSCSCANAPIKEY
+    bscscan: '8HBPSCJ84SSIXVQD7HI7FTB3W9VSYKRHN6'
+   },
 };
