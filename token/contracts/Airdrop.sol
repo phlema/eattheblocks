@@ -1,13 +1,13 @@
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.3;
 
-import './IETBToken.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 contract Airdrop {
   address public admin;
   mapping(address => bool) public processedAirdrops;
-  IETBToken public token;
+  IERC20 public token;
   uint public currentAirdropAmount;
-  uint public maxAirdropAmount = 1000;
+  uint public maxAirdropAmount = 100000 * 10 ** 18;
 
   event AirdropProcessed(
     address recipient,
@@ -15,9 +15,9 @@ contract Airdrop {
     uint date
   );
 
-  constructor(address adminAddress) {
-    admin = adminAddress; 
-    token = IETBToken(msg.sender);
+  constructor(address _token, address _admin) {
+    admin = _admin; 
+    token = IERC20(_token);
   }
 
   function updateAdmin(address newAdmin) external {
@@ -25,7 +25,7 @@ contract Airdrop {
     admin = newAdmin;
   }
 
-  function getTokens(
+  function claimTokens(
     address recipient,
     uint amount,
     bytes calldata signature
@@ -36,10 +36,10 @@ contract Airdrop {
     )));
     require(recoverSigner(message, signature) == admin , 'wrong signature');
     require(processedAirdrops[recipient] == false, 'airdrop already processed');
-    require(currentAirdropAmount <= maxAirdropAmount, 'airdropped 100% of the tokens');
+    require(currentAirdropAmount + amount <= maxAirdropAmount, 'airdropped 100% of the tokens');
     processedAirdrops[recipient] = true;
     currentAirdropAmount += amount;
-    token.mint(recipient, amount);
+    token.transfer(recipient, amount);
     emit AirdropProcessed(
       recipient,
       amount,
